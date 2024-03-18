@@ -1,0 +1,1542 @@
+Program.Sub.ScreenSU.Start
+Gui.frmDefault..Create(DashForm)
+Gui.frmDefault..Caption("Material Purchasing Dashboard")
+Gui.frmDefault..Size(15360,10800)
+Gui.frmDefault..MinX(0)
+Gui.frmDefault..MinY(0)
+Gui.frmDefault..Position(0,0)
+Gui.frmDefault..AlwaysOnTop(False)
+Gui.frmDefault..FontName("Tahoma")
+Gui.frmDefault..FontSize(8.25)
+Gui.frmDefault..ControlBox(True)
+Gui.frmDefault..MaxButton(True)
+Gui.frmDefault..MinButton(True)
+Gui.frmDefault..MousePointer(0)
+Gui.frmDefault..Moveable(True)
+Gui.frmDefault..Sizeable(True)
+Gui.frmDefault..ShowInTaskBar(True)
+Gui.frmDefault..TitleBar(True)
+Gui.frmDefault..Event(UnLoad,frmDefault_UnLoad)
+Gui.frmDefault.lookupVendor.Create(Lookup)
+Gui.frmDefault.lookupVendor.Enabled(True)
+Gui.frmDefault.lookupVendor.PopulateMode(4)
+Gui.frmDefault.lookupVendor.Title("Vendor Lookup")
+Gui.frmDefault.lookupVendor.StringBasis("")
+Gui.frmDefault.lookupVendor.FileBasis("")
+Gui.frmDefault.lookupVendor.ColumnDelim("")
+Gui.frmDefault.lookupVendor.RowDelim("")
+Gui.frmDefault.lookupVendor.PreferredStyle(1)
+Gui.frmDefault.lookupVendor.Event(SelectionMade,lookupVendor_SelectionMade)
+Gui.frmDefault.lookupPart.Create(Lookup)
+Gui.frmDefault.lookupPart.Enabled(True)
+Gui.frmDefault.lookupPart.PopulateMode(4)
+Gui.frmDefault.lookupPart.Title("Part Lookup")
+Gui.frmDefault.lookupPart.StringBasis("")
+Gui.frmDefault.lookupPart.FileBasis("")
+Gui.frmDefault.lookupPart.ColumnDelim("")
+Gui.frmDefault.lookupPart.RowDelim("")
+Gui.frmDefault.lookupPart.PreferredStyle(1)
+Gui.frmDefault.lookupPart.Event(SelectionMade,lookupPart_SelectionMade)
+Gui.frmDefault.tab1.Create(Tab)
+Gui.frmDefault.tab1.Enabled(True)
+Gui.frmDefault.tab1.Visible(True)
+Gui.frmDefault.tab1.Zorder(0)
+Gui.frmDefault.tab1.Size(15360,9810)
+Gui.frmDefault.tab1.Position(0,0)
+Gui.frmDefault.tab1.FontName("Tahoma")
+Gui.frmDefault.tab1.FontSize(8.25)
+Gui.frmDefault.tab1.Dock(5)
+Gui.frmDefault.tab1.Tabs(3)
+Gui.frmDefault.tab1.SetTab(0)
+Gui.frmDefault.tab1.Caption("Open Material Requirements")
+Gui.frmDefault.tab1.SetTab(1)
+Gui.frmDefault.tab1.Caption("Open Material Quotes")
+Gui.frmDefault.tab1.SetTab(2)
+Gui.frmDefault.tab1.Caption("Open POs")
+Gui.frmDefault.gsgcOpenPOs.Create(GsGridControl)
+Gui.frmDefault.gsgcOpenPOs.Enabled(True)
+Gui.frmDefault.gsgcOpenPOs.Visible(True)
+Gui.frmDefault.gsgcOpenPOs.Zorder(0)
+Gui.frmDefault.gsgcOpenPOs.Size(15330,9375)
+Gui.frmDefault.gsgcOpenPOs.Position(0,0)
+Gui.frmDefault.gsgcOpenPOs.Parent("tab1",2)
+Gui.frmDefault.gsgcOpenPOs.Dock(5)
+gui.frmDefault.gsgcOpenPOs.Event(RowCellClick,GsGC_RowCellClick_Universal)
+Gui.frmDefault.gsgcOpenMatQuotes.Create(GsGridControl)
+Gui.frmDefault.gsgcOpenMatQuotes.Enabled(True)
+Gui.frmDefault.gsgcOpenMatQuotes.Visible(True)
+Gui.frmDefault.gsgcOpenMatQuotes.Zorder(0)
+Gui.frmDefault.gsgcOpenMatQuotes.Size(15330,9375)
+Gui.frmDefault.gsgcOpenMatQuotes.Position(0,0)
+Gui.frmDefault.gsgcOpenMatQuotes.Parent("tab1",1)
+Gui.frmDefault.gsgcOpenMatQuotes.Dock(5)
+gui.frmDefault.gsgcOpenMatQuotes.Event(RowCellClick,GsGC_RowCellClick_Universal)
+gui.frmDefault.gsgcOpenMatQuotes.Event(CellValueChanged,GsGC_CellValueChanged_Universal)
+Gui.frmDefault.gsgcOpenMatReq.Create(GsGridControl)
+Gui.frmDefault.gsgcOpenMatReq.Enabled(True)
+Gui.frmDefault.gsgcOpenMatReq.Visible(True)
+Gui.frmDefault.gsgcOpenMatReq.Zorder(0)
+Gui.frmDefault.gsgcOpenMatReq.Size(15330,9375)
+Gui.frmDefault.gsgcOpenMatReq.Position(0,0)
+Gui.frmDefault.gsgcOpenMatReq.Parent("tab1",0)
+Gui.frmDefault.gsgcOpenMatReq.Dock(5)
+gui.frmDefault.gsgcOpenMatReq.Event(RowCellClick,GsGC_RowCellClick_Universal)
+gui.frmDefault.gsgcOpenMatReq.Event(CellValueChanged,GsGC_CellValueChanged_Universal)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+V.Global.bLoadData.Declare
+V.Global.sGridViews.Declare
+v.Global.iVendRow.Declare
+v.Global.bResched.Declare
+v.global.sBuildData.Declare
+Program.External.Include.Library("Gridview_UniversalFunctions_UEL.lib")
+Program.External.Include.Library("175100.lib")
+Program.External.Include.Library("UPLPUROR.lib")
+Program.External.Include.Library("175200.lib")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+f.Intrinsic.Control.Try
+	'FORMNAME*!*CONTROLNAME*!*GRIDVIEWNAME#$#form*!*gsgridcontrol*!*gridview#$#etc*!*etc*!*etc
+	V.Global.sGridViews.Set("frmDefault*!*gsgcOpenMatReq*!*gvOpenMatReq#$#frmDefault*!*gsgcOpenMatQuotes*!*gvOpenMatQuotes#$#frmDefault*!*gsgcOpenPOs*!*gvOpenPurchase")
+	
+	'ContextMenus
+	F.Intrinsic.Control.CallSub(SetContextMenus,"sGridControls","frmDefault*!*gsgcOpenMatReq*!*CTXMENU","sContextMenuItems","Reschedule*!*Reschedule Lines*!*cmdReschedule_Click#$#NewPart*!*Create Part*!*cmdNewPart_Click#$#NewRFQ*!*New RFQ*!*cmdNewRFQ_Click#$#Refresh*!*Refresh*!*cmdRefresh_Click#$#Export*!*Export*!*ExportGrids#$#ResetColumns*!*Reset Columns*!*ResetGridColumns")
+	
+	F.Intrinsic.Control.CallSub(SetContextMenus,"sGridControls","frmDefault*!*gsgcOpenMatQuotes*!*CTXMENUOpenQuotes","sContextMenuItems","NewPO*!*New Purchase Order*!*cmdNewPO_Click#$#Refresh*!*Refresh*!*cmdRefreshQuotes_click#$#Close*!*Close*!*cmdCloseQuotes_click")
+	
+	'Set ARC ID
+	F.Intrinsic.Control.CallSub(SetARCID)
+	
+	'Open DB Connection
+	F.ODBC.Connection!con.OpenCompanyConnection(500)
+	
+	'Set first tab as active tab
+	Gui.frmDefault.tab1.SetTab(0)
+	
+	'Load Vendor Lookup
+	f.Data.DataTable.CreateFromSQL("dtVendors","con","SELECT NAME_VENDOR, VENDOR FROM V_VENDOR_MASTER ORDER BY NAME_VENDOR",true)
+	gui.frmDefault.lookupVendor.DataTableBasis("dtVendors")
+	
+	'Load Part Lookup
+	f.Data.DataTable.CreateFromSQL("dtParts","con","SELECT PART, DESCRIPTION, UM_INVENTORY, A.NAME_VENDOR as 'VendorNumber', B.NAME_VENDOR AS 'VendorName' FROM V_INVENTORY_ALL A LEFT JOIN V_VENDOR_MASTER B ON A.NAME_VENDOR = B.VENDOR ORDER BY PART",true)
+	gui.frmDefault.lookupPart.DataTableBasis("dtParts")
+	
+	'Load Tab 0 > Open Material Requirements
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatReq")
+	
+	'Load Tab 1 > Open Material Quotes
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatQuotes")
+	
+	'Load Tab 2 > Open POs
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenPOs")
+	
+	'load grid preferences
+	'F.Intrinsic.Control.CallSub(Deserialize)
+	
+	gui.frmDefault..Show
+f.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+f.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.DataLoader.Start
+F.Intrinsic.Control.Try
+
+	V.Local.sError.Declare
+	v.Local.sCaption.Declare
+	
+	F.Intrinsic.Control.SelectCase(V.Args.sKey)
+		F.Intrinsic.Control.Case("gsgcOpenMatReq")
+			'Changed from F.DESCRIPTION TO A.DESCRIPTION
+			F.Intrinsic.Control.CallSub(LoadData, "sDataTableName","dtOpenMatReq","sFormName","frmDefault","sGridControlName","gsgcOpenMatReq","sGridViewName","gvOpenMatReq","sSQL","select CONVERT(0,SQL_BIT) AS 'SelectLine', D.NAME_VENDOR as 'VendorName', rtrim(C.NAME_VENDOR) as 'VendorNum', '^' as 'Browse',  ' ' as 'PartExists', RTRIM(A.PART) AS 'PART', B.Location, '^' as 'BrowsePart', rtrim(A.Description) as 'Description', E.TEXT,  A.UNITS AS 'UNIT_QUANTITY', B.QTY_ORDER AS 'RUN_QTY', A.HOURS_ESTIMATED AS 'RFQ_QUANTITY', A.UM as 'UM', A.ROUTER, concat(A.JOB,concat('-',A.SUFFIX)) as 'WO', A.JOB, A.SUFFIX, A.SEQ, concat(a.job,concat('-',concat(a.suffix,concat('-',a.seq)))) as 'SORT_CODE_1', A.DATE_DUE AS 'OpDateDue', B.DATE_DUE , ' ' AS 'RFQ', ' ' AS 'PO', A.LMO FROM V_JOB_OPERATIONS A LEFT JOIN V_JOB_HEADER B ON A.JOB=B.JOB AND A.SUFFIX=B.SUFFIX LEFT JOIN INVENTORY_MST2 C ON A.PART=C.PART LEFT JOIN INVENTORY_MSTR F ON A.PART=F.PART LEFT JOIN V_VENDOR_MASTER D ON C.NAME_VENDOR = D.VENDOR LEFT JOIN WO_SEQ_COMMENTS E ON E.WO = A.JOB AND E.WO_SUFFIX = A.SUFFIX AND E.WO_SEQ =  A.SEQ WHERE (A.LMO='M' or A.LMO='O') AND B.DATE_CLOSED='1900-01-01' AND a.FLAG_CLOSED<>'Y' and a.seq<>'995000' and a.seq<>'998000' and left(a.seq,2)<>'99'")
+			f.Data.Dictionary.CreateFromSQL("dINVE","con","SELECT rtrim(PART) as 'Part', 'Y' as 'Exists' FROM V_INVENTORY_MSTR")
+			f.Data.Dictionary.SetDefaultReturn("dINVE","")
+			f.Data.DataTable.FillFromDictionary("dtOpenMatReq","dINVE","Part","PartExists")
+			f.Data.Dictionary.Close("dINVE")
+			
+			f.Data.Dictionary.CreateFromSQL("dRFQE","con","select DISTINCT RTRIM(SORT_CODE_1) AS 'SORT_CODE_1', RFQ_NUMBER AS 'RFQ' from VEND_QTE_HEADER")
+			f.Data.Dictionary.SetDefaultReturn("dRFQE","")
+			f.Data.DataTable.FillFromDictionary("dtOpenMatReq","dRFQE","SORT_CODE_1","RFQ")
+			f.Data.Dictionary.Close("dRFQE")
+			
+			F.Data.Dictionary.CreateFromSQL("dPO","con","select CONCAT(JOB,CONCAT('-',CONCAT(SUFFIX,CONCAT('-',SEQUENCE)))) AS 'SORT_CODE_1',PURCHASE_ORDER AS 'PO' from V_PO_LINES")
+			F.Data.Dictionary.SetDefaultReturn("dPO","")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatReq","dPO","SORT_CODE_1","PO")
+			f.Data.Dictionary.Close("dPO")
+	
+			gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","SelectLine","Visible","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Browse","Icon","BROWSE")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","BrowsePart","Icon","BROWSE")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","VendorNum","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Description","AllowEdit","True")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Description","ReadOnly","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Description","Minwidth","185")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Description","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","UM","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","UNIT_QUANTITY","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","UNIT_QUANTITY","Caption","Qty (Unit)")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","RFQ_QUANTITY","Caption","Qty (RFQ Total)")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","RUN_QTY","Caption","Qty (WO Run)")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Part","Minwidth","150")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Router","Minwidth","150")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Text","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Text","Minwidth","300")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Text","AllowEdit","True")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Text","ReadOnly","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Opdatedue","DisplayCustomDatetime","d")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","DATE_DUE","DisplayCustomDatetime","d")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Location","Visible","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","SORT_CODE_1","Visible","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","RFQ","AllowEdit","False")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","RFQ","ReadOnly","True")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","RFQ","CellForeColor","Blue")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","Opdatedue","AllowEdit","false")
+			Gui.frmDefault.gsgcOpenMatReq.SetColumnProperty("gvOpenMatReq","DATE_DUE","AllowEdit","false")
+			
+			
+		F.Intrinsic.Control.Case("gsgcOpenMatQuotes")
+			
+			F.Intrinsic.Control.CallSub(LoadData, "sDataTableName","dtOpenMatQuotes","sFormName","frmDefault","sGridControlName","gsgcOpenMatQuotes","sGridViewName","gvOpenMatQuotes","sSQL","select DISTINCT CONVERT(0,SQL_BIT) As 'SelectLine', A.RFQ_NUMBER, B.RFQ_LINE, A.SEQ, A.QUOTE_DATE, A.RFQ_REQD_BY_DATE, ' ' AS NAME_VENDOR, A.VENDOR, A.PART, A.PART_DESC, ' ' AS 'TEXT', B.QUANTITY, a.pur_um, CONVERT(0,SQL_FLOAT) AS 'CurPrice', B.UNIT_PRICE AS 'NewPrice', 'Price Hist' as 'PriceHist', ' ' as 'Router', Convert(0,SQL_FLOAT) AS 'Diff',rtrim(SORT_CODE_1) as 'WorkOrder', LEFT(SORT_CODE_1,10) as 'WOSuff', CONVERT('1900-01-01',SQL_DATE) As WO_DUE_DATE,  ' ' AS 'SalesPerson', concat(RFQ_NUMBER,RFQ_LINE) AS 'RfqNumLine',' ' as 'PO', '' as 'Loc' from V_VEND_QTE_HEADER A LEFT JOIN VEND_QTE_LINES B ON A.PART = B.PART AND A.SEQ = B.SEQ WHERE A.SORT_CODE_2<>'Y'")
+			f.Data.Dictionary.CreateFromSQL("dDueDates","con","SELECT CONCAT(B.JOB,CONCAT('-',CONCAT(B.SUFFIX,CONCAT('-',B.SEQ)))) AS 'WorkOrder', B.DATE_DUE as 'WO_DUE_DATE'  FROM V_JOB_HEADER A LEFT JOIN V_JOB_OPERATIONS B ON A.JOB = B.JOB AND  A.SUFFIX=B.SUFFIX")
+			F.Data.Dictionary.SetDefaultReturn("dDueDates","1900-01-01")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dDueDates","WorkOrder","WO_DUE_DATE")
+			f.Data.Dictionary.CreateFromSQL("dCurPrice","con","SELECT CONCAT(JOB,CONCAT('-',CONCAT(SUFFIX,CONCAT('-',SEQ)))) AS 'WorkOrder', BURDEN AS 'CurPrice'  FROM JOB_OPERATIONS ")
+			F.Data.Dictionary.SetDefaultReturn("dCurPrice","0")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dCurPrice","WorkOrder","CurPrice")
+			f.Data.Dictionary.Close("dDueDates")
+			f.Data.Dictionary.Close("dCurPrice")
+			
+			f.Data.Dictionary.CreateFromSQL("dExtraText","con","select CONCAT(NUMBER,LINE) AS 'RFQNUMLINE',TEXT from VEND_RFQ_LN_TEXT")
+			F.Data.Dictionary.SetDefaultReturn("dExtraText","")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dExtraText","RFQNUMLINE","text")
+			f.Data.Dictionary.Close("dExtraText")
+			
+			f.Data.Dictionary.CreateFromSQL("dNameVendor","con","select vendor,NAME_VENDOR from V_VENDOR_MASTER")
+			F.Data.Dictionary.SetDefaultReturn("dNameVendor","")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dNameVendor","Vendor","NAME_VENDOR")
+			f.Data.Dictionary.Close("dNameVendor")
+			
+			F.Data.Dictionary.CreateFromSQL("dPO","con","select CONCAT(JOB,CONCAT('-',CONCAT(SUFFIX,CONCAT('-',SEQUENCE)))) AS 'WorkOrder',PURCHASE_ORDER AS 'PO' from V_PO_LINES")
+			F.Data.Dictionary.SetDefaultReturn("dPO","")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dPO","WorkOrder","PO")
+			f.Data.Dictionary.Close("dPO")
+			
+			F.Data.Dictionary.CreateFromSQL("dRouter","con","select DISTINCT CONCAT(A.JOB,CONCAT('-',A.SUFFIX)) AS 'WOSuff', b.router from job_operations a left join job_header b on A.JOB=B.JOB AND A.SUFFIX=B.SUFFIX")
+			F.Data.Dictionary.SetDefaultReturn("dRouter","")
+			F.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dRouter","WOSuff","RouteR")
+			f.Data.Dictionary.Close("dRouter")
+			
+			F.Data.Dictionary.CreateFromSQL("dPOCost","con","select PART, COST as 'CurPrice' from V_PO_LINES ORDER BY PART, DATE_LAST_CHG DESC")
+			f.Data.Dictionary.SetDefaultReturn("dPOCost","0")
+			f.Data.DataTable.FillFromDictionary("dtOpenMatQuotes","dPOCost","Part","CurPrice")	
+			f.Data.Dictionary.Close("dPOCost")
+
+	
+			F.Data.DataTable.AddExpressionColumn("dtOpenMatQuotes","DiffPerc","float","((NewPrice-CurPrice)/CurPrice)*100")
+			F.Data.DataTable.CopyColumn("dtOpenMatQuotes","DiffPerc","Diff")
+			
+	
+			'Additional Grid Formatting Options...
+			gui.frmDefault.gsgcOpenMatQuotes.AddStyleFormatCondition("gvOpenMatQuotes","DIFF","TAGNAME1","LessOrEqual","0")
+			gui.frmDefault.gsgcOpenMatQuotes.SetStyleFormatConditionProperty("gvOpenMatQuotes","DIFF","TAGNAME1","BackColor","LightGreen")
+			
+			gui.frmDefault.gsgcOpenMatQuotes.AddStyleFormatCondition("gvOpenMatQuotes","DIFF","TAGNAME2","Greater","0")
+			gui.frmDefault.gsgcOpenMatQuotes.SetStyleFormatConditionProperty("gvOpenMatQuotes","DIFF","TAGNAME2","BackColor","Red")
+	
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","RFQ_NUMBER","ReadOnly","True")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","RFQ_NUMBER","AllowEdit","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","RFQ_NUMBER","CellForeColor","Blue")
+			
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","DIFF","ReadOnly","True")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","DIFF","AllowEdit","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PriceHist","ReadOnly","True")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PriceHist","AllowEdit","False")
+			
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","Loc","Visible","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","SelectLine","Visible","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","Salesperson","Visible","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","RFQNUMLINE","Visible","False")
+			gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","WOSUFF","Visible","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PO","ReadOnly","True")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PO","AllowEdit","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","WO_DUE_DATE","Caption","Due Date Material")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PART_DESC","ReadOnly","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","PART_DESC","Minwidth","185")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","TEXT","ReadOnly","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","TEXT","Minwidth","185")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","Part","Minwidth","150")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","WorkOrder","Minwidth","150")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","quote_date","DisplayCustomDatetime","d")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","rfq_reqd_by_date","DisplayCustomDatetime","d")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","NewPrice","CellBackColor","LightYellow")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","quote_date","AllowEdit","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","rfq_reqd_by_date","AllowEdit","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","WO_DUE_DATE","AllowEdit","False")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","CurPrice","Caption","Old Price")
+			Gui.frmDefault.gsgcOpenMatQuotes.SetColumnProperty("gvOpenMatQuotes","DIFF","DisplayCustomNumeric","n2")
+			
+		
+		F.Intrinsic.Control.Case("gsgcOpenPOs")
+		
+			F.Intrinsic.Control.CallSub(LoadData, "sDataTableName","dtOpenPOs","sFormName","frmDefault","sGridControlName","gsgcOpenPOs","sGridViewName","gvOpenPurchase","sSQL","Select Distinct Cast(0 As Bit) As Email,Case When D.Conf Is Null Then Convert(0,SQL_BIT) When Conf = 0 Then Convert(0,SQL_BIT) When Conf = 1 Then Convert(1,SQL_BIT) End As CONF,A.PURCHASE_ORDER AS 'PO',Left(A.RECORD_NO,3) AS RECORD_NO,B.NAME_VENDOR,Coalesce(A.PART,'') AS PART,'' As DISPLAY_PART,A.LOCATION,A.DESCRIPTION,A.PRODUCT_LINE, C.BUYER,C.DATE_ORDER AS PO_DATE,A.DATE_DUE_LINE,A.EXTENSION,A.QTY_ORDER,A.QTY_RECEIVED,A.QTY_REJECT AS QTY_REJECT,(A.QTY_ORDER-A.QTY_RECEIVED-A.QTY_REJECT) AS QTY_OPEN,A.QTY_RECD_NOT_INSP,A.COST,A.JOB,A.SUFFIX,RTrim(C.SHIP_VIA) As SHIP_VIA,A.BLANKET_PO,Case When Type = 0 Then If(SubString(PART,17,1) = '*','Outside','Normal') When TYPE = 1 Then 'Blanket' End AS TYPE,RTrim(F.SHIP_TO_SEQ) AS SHIPTO,E.NOTES,A.USER_5,Cast(Case Requires_Insp When 'Y' Then 1 Else 0 End As Bit) As Requires_Insp,RTrim(B.Contact_Name) As Contact_Name,RTrim(B.Contact_Email) As Contact_Email From V_PO_Lines A Left Join V_PO_Vendor_Buy B ON A.Purchase_Order = B.Purchase_Order Left Join V_PO_Header C ON A.Purchase_Order = C.Purchase_Order Left Join Gab_PO_Confchk D ON A.Purchase_Order = D.Purchase_Order Left Join Gab_4163_PO_Notes E ON A.Purchase_Order = E.PO AND A.Record_No = CONCAT(E.POLine,0) Left Join V_PO_Pay_To F ON A.Purchase_Order = F.Purchase_Order Where C.Flag_Recv_Closed <> 'Y' And A.FLAG_RECV_CLOSE <> 'Y' And QTY_OPEN <> 0 Order By A.DATE_DUE_LINE;")
+			
+			'f.Data.DataTable.AddExpressionColumn("dtOpenPOs","OPENEXTENSION","float","COST*QTY_OPEN")
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EMAIL","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONTACT_NAME","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONTACT_EMAIL","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","Visible","false")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","Visible","false")
+			
+			Gui.frmDefault.gsgcOpenPOs.SetGridViewProperty("gvOpenPurchase","MultiSelect",True)
+			Gui.frmDefault.gsgcOpenPOs.SetGridViewProperty("gvOpenPurchase","AllowSort",True)
+			Gui.frmDefault.gsgcOpenPOs.SetGridViewProperty("gvOpenPurchase","AllowFilter",True)
+			Gui.frmDefault.gsgcOpenPOs.SetGridViewProperty("gvOpenPurchase","OptionsDetailShowDetailTabs",False)
+			Gui.frmDefault.gsgcOpenPOs.SetGridViewProperty("gvOpenPurchase","OptionsViewShowGroupPanel",True)
+			Gui.frmDefault.gsgcOpenPOs.SetGridviewProperty("gvOpenPurchase","OptionsFilterUseNewCustomFilterDialog",True)
+			Gui.frmDefault.gsgcOpenPOs.SetGridviewProperty("gvOpenPurchase","OptionsViewColumnAutoWidth",False)
+			Gui.frmDefault.gsgcOpenPOs.SetGridviewProperty("gvOpenPurchase","OptionsViewRowAutoHeight",true)
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","Caption","Email")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","Caption","Confirmation")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","Caption","PO")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","Caption","Ln")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NAME_VENDOR","Caption","Vendor Name")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PART","Caption","Part Number")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","Caption","Part Number")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","Caption","Loc")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DESCRIPTION","Caption","Part Description")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","Caption","PL")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","Caption","Buyer")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","Caption","PO Date")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","Caption","Due Date")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_ORDER","Caption","Order Qty")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECEIVED","Caption","Qty Received")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_REJECT","Caption","Qty Rejected")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","Caption","Qty Open")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","Caption","Qty In Insp.")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","COST","Caption","Cost ($)")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EXTENSION","Caption","Ext ($)")
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","OPENEXTENSION","Caption","Open Ext. ($)")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","Caption","Job")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","Caption","Suffix")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","Caption","Ship Via")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","Caption","Blanket PO")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","Caption","Type")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","Caption","Ship To")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","Caption","Notes ")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","Caption","User Field 5 (30 Characters)")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","Caption","Req. Insp.")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","Caption","Contact Name")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","Caption","Email Address")
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Conf","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","MinWidth","75")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","MinWidth","25")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NAME_VENDOR","MinWidth","200")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PART","MinWidth","130")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","MinWidth","130")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","MinWidth","45")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DESCRIPTION","MinWidth","200")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","MinWidth","30")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","MinWidth","50")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","MinWidth","75")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","MinWidth","75")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_ORDER","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECEIVED","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_REJECT","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","COST","MinWidth","95")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EXTENSION","MinWidth","105")
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","OPENEXTENSION","MinWidth","105")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","MinWidth","45")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","MinWidth","45")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","MinWidth","125")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","MinWidth","75")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","MinWidth","55")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","MinWidth","90")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","MinWidth","200")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","MinWidth","200")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","MinWidth","85")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","MinWidth","120")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","MinWidth","200")
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NAME_VENDOR","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PART","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DESCRIPTION","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_ORDER","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECEIVED","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_REJECT","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","COST","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EXTENSION","HeaderFontBold",True)
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","OPENEXTENSION","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","HeaderFontBold",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","HeaderFontBold",True)
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NAME_VENDOR","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PART","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DESCRIPTION","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_ORDER","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECEIVED","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_REJECT","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","COST","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EXTENSION","HeaderHAlignment","Center")
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","OPENEXTENSION","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","HeaderHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","HeaderHAlignment","Center")
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","CellHAlignment","Center")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","CellHAlignment","Center")
+		
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Email","Fixed","Left")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","CONF","Fixed","Left")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","Fixed","Left")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","Fixed","Left")
+		
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","RECORD_NO","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NAME_VENDOR","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PART","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DISPLAY_PART","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","LOCATION","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DESCRIPTION","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PRODUCT_LINE","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BUYER","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO_DATE","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","DATE_DUE_LINE","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_ORDER","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECEIVED","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_REJECT","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_OPEN","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","QTY_RECD_NOT_INSP","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","COST","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","EXTENSION","AllowEdit",False)
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","OPENEXTENSION","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","JOB","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SUFFIX","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIP_VIA","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","BLANKET_PO","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","TYPE","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","SHIPTO","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","AllowEdit",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","AllowEdit",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Requires_Insp","AllowEdit",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","AllowEdit",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","AllowEdit",False)
+			
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","PO","CellForeColor",V.Enum.ThemeColors!AccentColor)
+
+		
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","NOTES","ReadOnly",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","USER_5","ReadOnly",False)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Name","ReadOnly",True)
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase","Contact_Email","ReadOnly",True)
+			
+			'Past Due mark Pink
+			v.Local.sExp.Declare
+			v.Local.sSelect.Declare
+			v.Local.iCnt.Declare
+			F.Intrinsic.String.Build("DATE_DUE_LINE < #{0}#",V.Ambient.Date.FormatMM/DD/YYYY,V.Local.sExp)
+			F.Data.DataTable.Select("dtOpenPOs",V.Local.sExp,V.Local.sSelect)
+			F.Intrinsic.Control.If(V.Local.sSelect,<>,"***NORETURN***")
+				F.Intrinsic.String.Split(V.Local.sSelect,"*!*",V.Local.sSelect)
+				F.Intrinsic.Control.For(V.Local.iCnt,0,V.Local.sSelect.UBound,1)
+					Gui.frmDefault.gsgcOpenPOs.SetRowAppearance("gvOpenPurchase",V.Local.sSelect(V.Local.iCnt).Long,"BackColor","Pink")
+				F.Intrinsic.Control.Next(V.Local.iCnt)
+			F.Intrinsic.Control.EndIf
+					
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "EXTENSION", "DisplayCustomNumeric", "n2")
+			'Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "OPENEXTENSION", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "COST", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "QTY_OPEN", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "QTY_ORDER", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "QTY_RECEIVED", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "QTY_REJECT", "DisplayCustomNumeric", "n2")
+			Gui.frmDefault.gsgcOpenPOs.SetColumnProperty("gvOpenPurchase", "QTY_RECD_NOT_INSP", "DisplayCustomNumeric", "n2")	
+	
+		'I felt obligated to tell the user/programmer when an undefined key was encountered that way they weren't left wondering why nothing was happening.
+		F.Intrinsic.Control.CaseElse
+			F.Intrinsic.String.Build("[Sub:{0} Key:{1}] This key was not specified.",V.Ambient.CurrentSubroutine,V.Args.sKey,V.Local.sError)
+			F.Intrinsic.UI.Msgbox(V.Local.sError)
+		
+		F.Intrinsic.Control.EndSelect
+		
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+F.Intrinsic.Control.EndTry
+Program.Sub.DataLoader.End
+
+Program.Sub.cmdRefresh_Click.Start
+f.Intrinsic.Control.Try
+	gui.frmDefault..Enabled(false)
+	gui.frmDefault.gsgcOpenMatReq.visible(false)
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatReq")
+	gui.frmDefault.gsgcOpenMatReq.visible(true)
+	gui.frmDefault..Enabled(true)
+f.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+f.Intrinsic.Control.EndTry
+
+Program.Sub.cmdRefresh_Click.End
+
+Program.Sub.cmdRefreshQuotes_click.Start
+f.Intrinsic.Control.Try
+	gui.frmDefault..Enabled(false)
+	gui.frmDefault.gsgcOpenMatQuotes.visible(false)
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatQuotes")
+	gui.frmDefault.gsgcOpenMatQuotes.visible(true)
+	gui.frmDefault..Enabled(true)
+f.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdRefreshQuotes_click.End
+
+Program.Sub.frmDefault_UnLoad.Start
+f.Intrinsic.Control.If(v.Global.bResched)
+	v.Local.i.Declare
+	v.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.dDateDue.Declare
+	
+	Gui.frmDefault..Enabled(false)
+	
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatReq!dvOpenMatReqSelected.Exists)
+		f.Data.DataView.close("dtOpenMatReq","dvOpenMatReqSelected")
+	f.Intrinsic.Control.EndIf
+	
+	'Create DataView
+	f.Data.DataView.Create("dtOpenMatReq","dvOpenMatReqSelected",22,"SelectLine=True","Part ASC")
+	
+	'Go through the lines now
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataView.dtOpenMatReq!dvOpenMatReqSelected.RowCount--,1)
+		f.Intrinsic.Control.If(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).SelectLine!Fieldval)
+			v.Local.sJob.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).JOB!Fieldval)
+			v.Local.sSuf.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).SUFFIX!Fieldval)
+			v.Local.dDateDue.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).DATE_DUE!Fieldval)
+			F.Global.APS.ScheduleJob(v.Local.sJob,v.Local.sSuf,"B",v.Local.dDateDue)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.local.i)
+f.Intrinsic.Control.EndIf
+f.ODBC.Connection!con.Close
+f.Intrinsic.Control.End
+Program.Sub.frmDefault_UnLoad.End
+
+Program.Sub.cmdReschedule_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare
+	v.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.dDateDue.Declare
+	
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatReq!dvOpenMatReqSelected.Exists)
+		f.Data.DataView.close("dtOpenMatReq","dvOpenMatReqSelected")
+	f.Intrinsic.Control.EndIf
+	
+	'Create DataView
+	f.Data.DataView.Create("dtOpenMatReq","dvOpenMatReqSelected",22,"SelectLine=True","Part ASC")
+	
+	gui.frmDefault..Enabled(false)
+	'Go through the lines now
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataView.dtOpenMatReq!dvOpenMatReqSelected.RowCount--,1)
+		f.Intrinsic.Control.If(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).SelectLine!Fieldval)
+			v.Local.sJob.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).JOB!Fieldval)
+			v.Local.sSuf.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).SUFFIX!Fieldval)
+			v.Local.dDateDue.Set(v.DataView.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).DATE_DUE!Fieldval)
+			F.Global.APS.ScheduleJob(v.Local.sJob,v.Local.sSuf,"B",v.Local.dDateDue)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.local.i)
+	gui.frmDefault..SetFocus(1)
+	gui.frmDefault..Enabled(true)
+	
+f.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdReschedule_Click.End
+
+Program.Sub.cmdNewPart_click.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare(long)
+	v.Local.spart.Declare(string)
+	V.Local.sSql.Declare(string)
+	v.Local.sUm.Declare(string)
+	v.Local.sDescription.Declare(string)
+	v.Local.sLoc.Declare(string)
+	v.Local.sPL.Declare(string)
+	v.Local.sMessage.Declare(string)
+	v.Local.sParams.Declare(string)
+	v.Local.fPrice.Declare(float)
+	v.Local.lret.Declare(long)
+	
+	f.Intrinsic.Control.If(v.DataTable.dtParts.Exists)
+		f.Data.DataTable.Close("dtParts")
+	f.Intrinsic.Control.EndIf	
+	
+	f.Data.DataTable.Create("dtParts","true")
+	f.Data.DataTable.AddColumn("dtParts","Part","String")
+	f.Data.DataTable.AddColumn("dtParts","Desc","String")
+	f.Data.DataTable.AddColumn("dtParts","PrdL","String")
+	f.Data.DataTable.AddColumn("dtParts","UoMs","String")
+	f.Data.DataTable.AddColumn("dtParts","Orig","Long")
+	
+	'Verify if the user wants to do this.
+	f.Intrinsic.String.Concat("Create/Maintain Parts for: ",v.Ambient.NewLine,v.Local.sMessage)
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtOpenMatReq.RowCount--,1)
+		f.Intrinsic.Control.If(v.DataTable.dtOpenMatReq(v.Local.i).SelectLine!fieldval)
+			v.Local.sUm.Set(v.DataTable.dtOpenMatReq(v.Local.i).UM!Fieldvaltrim)
+			v.Local.spart.Set(v.DataTable.dtOpenMatReq(v.Local.i).Part!fieldvaltrim)
+			v.Local.sDescription.Set(v.DataTable.dtOpenMatReq(v.Local.i).Description!fieldvaltrim)
+			v.Local.sPL.Set("RM")	
+			f.Data.DataTable.AddRow("dtParts","Part",v.Local.spart,"Desc",v.Local.sDescription,"PrdL",v.Local.sPL,"UoMs",v.Local.sUm,"Orig",v.Local.i)
+			f.Intrinsic.String.Concat(v.Local.sMessage,v.Local.spart,v.Ambient.NewLine,v.Local.sMessage)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Reset i before continuing on
+	v.Local.i.Set(0)
+	f.Intrinsic.UI.Msgbox(v.Local.sMessage,"Create Parts?",4,v.Local.lret)
+	f.Intrinsic.Control.If(v.Local.lret,=,6)
+	
+		gui.frmDefault.gsgcOpenMatReq.visible(false)
+		GUI.frmDefault..Enabled(FALSE)
+		f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtParts.RowCount--,1)
+			v.Local.spart.Set(v.DataTable.dtParts(v.Local.i).Part!fieldvaltrim)
+			v.Local.sDescription.Set(v.DataTable.dtParts(v.Local.i).Desc!fieldvaltrim)
+			v.Local.sPL.Set(v.DataTable.dtParts(v.Local.i).PrdL!FIELDVALTRIM)
+			v.Local.sUm.Set(v.DataTable.dtParts(v.Local.i).UoMs!FIELDVALTRIM)		
+			f.Global.Inventory.CreatePart(v.Local.spart,v.Local.sUm,"",v.Local.sLoc,v.Local.sPL,"","","",v.Local.fPrice,"NOMAINT")
+			f.Intrinsic.String.Build("UPDATE INVENTORY_MSTR SET DESCRIPTION='{0}' WHERE PART='{1}'",v.Local.sDescription,v.Local.spart,v.Local.sSql)
+			f.ODBC.Connection!con.execute(v.Local.ssql)
+			F.Intrinsic.String.ConcatCallWrapperArgs("O","D",v.Local.sPart,v.Local.sParams)
+			F.Intrinsic.String.Concat(V.Caller.CompanyCode,"!*!","O","!*!","!*!","!*!",v.Local.spart,"!*!","",V.Local.sParams)
+			F.Global.General.CallWrappersync(3500,V.Local.sParams)
+			f.Data.DataTable.SetValue("dtOpenMatReq",v.DataTable.dtParts(v.Local.i).Orig!Fieldval,"SelectLine","False")
+		f.Intrinsic.Control.Next(v.Local.i)
+	f.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatReq")
+	gui.frmDefault.gsgcOpenMatReq.visible(true)
+	gui.frmDefault..SetFocus(1)
+	GUI.frmDefault..Enabled(True)
+f.Intrinsic.Control.Catch
+	F.Intrinsic.UI.Msgbox(V.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdNewPart_click.End
+
+Program.Sub.cmdNewRFQ_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare
+	v.Local.ssql.Declare
+	V.Local.iMaxNum.Declare
+	v.Local.sMaxNum.Declare
+	V.Local.sNewMaxNum.Declare
+	v.Local.sRFQLine.Declare
+	v.Local.sSrch.Declare
+	v.Local.sret.Declare
+	v.Local.iRFQLine.Declare
+	v.local.iBID.Declare
+	v.Local.sBIReport.Declare
+	v.Local.bReportPrint.Declare
+	v.Local.sParam.Declare
+	v.Local.sValue.Declare
+	v.Local.sVend.Declare
+	v.Local.sText.Declare
+	v.Local.sJobSuffixSequence.Declare
+	v.Local.bErrorCheck.Declare
+	V.Local.dReplyByDate.Declare
+	v.Local.sReplyByDate.Declare
+	v.Local.sRequiredBy.Declare
+	f.Intrinsic.Date.DateAdd("d",1,v.Ambient.Date,v.Local.dReplyByDate)
+	f.Intrinsic.String.Format(v.Local.dReplyByDate,"MMDDYYYY",v.Local.sReplyByDate)
+	f.Intrinsic.String.Format(v.Local.dReplyByDate,"YYYYMMDD",v.Local.sRequiredBy)
+	
+	'BiReport
+	v.Local.sBIReport.Set("GAB_6476_RFQ_REPORT.rpt")
+	f.Global.BI.GetIDFromName(v.Local.sBIReport,v.Local.iBID)
+	v.Local.sParam.Set("RFQNum")
+	
+	'Close data and view tables if they exists
+	F.Intrinsic.Control.If(V.DataTable.dtPartsVendor.Exists)
+		f.Data.Datatable.Close("dtPartsVendor")
+	F.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatReq!dvOpenMatReqSelected.Exists)
+		f.Data.DataView.close("dtOpenMatReq","dvOpenMatReqSelected")
+	f.Intrinsic.Control.EndIf
+	
+	'Create DataView
+	f.Data.DataView.Create("dtOpenMatReq","dvOpenMatReqSelected",22,"SelectLine=True","Part ASC")
+	
+	'Filter to seperate table
+	f.Data.DataView.ToDataTableDistinct("dtOpenMatReq","dvOpenMatReqSelected","dtPartsVendor","SelectLine*!*VendorNum")
+	f.Data.DataTable.AddColumn("dtPartsVendor","RFQ","String")
+	
+	'Set RFQ #
+	F.ODBC.Connection!con.executeandreturn("SELECT MAX(NUM) FROM VENDOR_RFQ_TRANS",v.Local.sMaxNum)
+	f.Intrinsic.Math.ConvertToLong(v.Local.sMaxNum,v.Local.iMaxNum)
+	f.Intrinsic.Control.For(v.Local.i,0,v.datatable.dtPartsVendor.RowCount--,1)
+		f.Intrinsic.Math.Add(v.Local.iMaxNum,1,v.Local.iMaxNum)
+		f.Intrinsic.String.LPad(v.Local.iMaxNum,"0",6,v.Local.sNewMaxNum)
+		f.Data.DataTable.SetValue("dtPartsVendor",v.Local.i,"RFQ",v.Local.sNewMaxNum)
+		f.Intrinsic.String.Concat(v.Local.sValue,v.Ambient.DblQuote,v.Local.sNewMaxNum,v.Ambient.DblQuote," ",v.Local.sValue)
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Go through the lines now
+	f.Intrinsic.Control.For(v.Local.i,v.DataView.dtOpenMatReq!dvOpenMatReqSelected.RowCount--,0,-1)
+		f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).SelectLine!Fieldval)
+			v.Local.bReportPrint.Set(True)
+			f.Intrinsic.Control.If(v.DataView.dtopenmatreq!dvOpenMatReqSelected(v.Local.i).VendorNum!fieldvaltrim,=,"")
+				f.Intrinsic.UI.Msgbox("Blank Vendor, please set vendor number")
+				f.Intrinsic.Control.ExitSub
+			f.Intrinsic.Control.EndIf
+			
+			f.Intrinsic.String.Build("SELECT * FROM V_VENDOR_MASTER WHERE VENDOR='{0}'",v.DataView.dtopenmatreq!dvOpenMatReqSelected(v.Local.i).VendorNum!fieldvaltrim,v.Local.ssql)
+			f.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.local.sret)
+			f.Intrinsic.Control.If(v.Local.sret.Trim,=,"")
+				f.Intrinsic.UI.Msgbox("Vendor code does not exist, please set.")
+				f.Intrinsic.Control.ExitSub
+			f.Intrinsic.Control.EndIf
+			
+			'Different vendor, reset line
+			f.Intrinsic.Control.If(v.Local.sVend.Trim,<>,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorNum!FIELDVALTRIM)
+				V.Local.iRFQLine.Set(0)
+			f.Intrinsic.Control.EndIf
+			
+			'Set Variables, grab values
+			v.Local.sVend.Set(v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorNum!FIELDVAL)
+			f.Intrinsic.Math.Add(v.Local.iRFQLine,1,v.Local.iRFQLine)
+			f.Intrinsic.String.LPad(v.Local.iRFQLine,"0",3,v.Local.sRFQLine)
+			f.Intrinsic.String.Build("VendorNum='{0}' AND RFQ<>''",v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorNum!Fieldval,v.Local.sSrch)
+			f.Data.Datatable.Select("dtPartsVendor",v.Local.sSrch,v.Local.sret)
+			f.Intrinsic.String.Concat(v.DataView.dtopenmatreq!dvOpenMatReqSelected(v.local.i).WO!FIELDVAL,"-",v.DataView.dtopenmatreq!dvOpenMatReqSelected(v.Local.i).SEQ!Fieldval,v.Local.sJobSuffixSequence)
+			
+			'Format & Insert
+			f.Intrinsic.Control.CallSub(uploadVendorQuote,"JobSuffixSeq",v.Local.sJobSuffixSequence,"Part",v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).Part!Fieldval,"Vendor",v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorNum!Fieldval,"Quantity",v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).RFQ_Quantity!Fieldval,"RFQ",v.DataTable.dtpartsvendor(v.Local.sret).RFQ!fieldvaltrim,"RFQLine",v.Local.sRFQLine)
+			F.Intrinsic.String.Build("INSERT INTO VENDOR_RFQ_TRANS (NUM, LINE, PART_NUMBER, PART_DESC,QUANTITY,VENDOR,VENDOR_NAME,unit,REPLY_NAME,REPLY_EMAIL,reply_by,REQUIRED_BY) VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}')",v.DataTable.dtpartsvendor(v.Local.sret).RFQ!fieldvaltrim,v.Local.sRFQLine,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).Part!Fieldval,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).Description!Fieldval,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).RFQ_Quantity!Fieldval,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorNum!Fieldval,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).VendorName!Fieldval,v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).um!Fieldval,"Nathan Frisby","nathan.frisby@unitedmachinists.co.nz",v.Local.sReplyByDate,v.Local.sRequiredBy,v.Local.ssql)
+			f.ODBC.Connection!con.execute(v.Local.ssql)
+			
+			v.Local.sText.Set(v.DATAVIEW.dtOpenMatReq!dvOpenMatReqSelected(v.Local.i).TEXT!Fieldval)
+			F.Intrinsic.String.Build("INSERT INTO VEND_RFQ_LN_TEXT (NUMBER, LINE, TEXT) VALUES ('{0}','{1}','{2}')",v.DataTable.dtpartsvendor(v.Local.sret).RFQ!fieldvaltrim,v.Local.sRFQLine,v.Local.sText.PSQLFriendly,v.Local.ssql)
+			f.ODBC.Connection!con.execute(v.Local.ssql)
+			
+			f.Data.DataView.SetValue("dtOpenMatReq","dvOpenMatReqSelected",v.Local.i,"SelectLine",False)
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Print BI Report
+	f.Intrinsic.Control.If(v.Local.bReportPrint)
+		f.Global.BI.PrintReport(v.Local.iBID,0,v.Local.sParam,v.Local.sValue,"",false)
+	f.Intrinsic.Control.Else
+		f.Intrinsic.UI.Msgbox("No lines selected, no RFQ generated")
+	f.Intrinsic.Control.EndIf
+	
+	
+	'Upload Vendor Quote
+	v.Local.sfilename.Declare
+	f.Intrinsic.String.Concat(v.Caller.FilesDir,"\VENDQUOT.TXT",v.Local.sfilename)
+	f.Intrinsic.File.String2File(v.Local.sfilename,v.global.sBuildData)
+	
+	f.Global.General.CallWrapperSync(50,"UPLVENQP/U")
+	v.Global.sBuildData.Set("")
+f.Intrinsic.Control.Catch
+	F.Intrinsic.UI.Msgbox(V.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdNewRFQ_Click.End
+
+Program.Sub.cmdCloseQuotes_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.i.Declare
+	V.Local.sSql.Declare
+	
+	'Check views
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatQuotes!dvOpenMatQuotesSelected.Exists)
+		f.Data.DataView.close("dtOpenMatQuotes","dvOpenMatQuotesSelected")
+	f.Intrinsic.Control.EndIf
+	
+	'Create DataView
+	f.Data.DataView.Create("dtOpenMatQuotes","dvOpenMatQuotesSelected",22,"SelectLine=True","Part ASC")
+	
+	f.Intrinsic.Control.For(v.Local.i,v.DATAVIEW.dtOpenMatQuotes!dvOpenMatQuotesSelected.rowcount--,0,-1)
+		f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatQuotes!dvOpenMatQuotesSelected(v.Local.i).SelectLine!Fieldval)
+			f.Intrinsic.String.Build("UPDATE VEND_QTE_HEADER SET SORT_CODE_2='Y' where SORT_CODE_1='{0}'",v.DataView.dtOpenMatQuotes!dvOpenMatQuotesSelected(v.Local.i).Workorder!fieldvaltrim,v.Local.sSql)
+			f.ODBC.Connection!con.execute(v.Local.ssql)
+		f.Intrinsic.Control.EndIf
+		f.Data.DataView.SetValue("dtOpenMatQuotes","dvOpenMatQuotesSelected",v.Local.i,"SelectLine",False)
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	
+f.Intrinsic.Control.Catch
+	F.Intrinsic.UI.Msgbox(V.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdCloseQuotes_Click.End
+
+Program.Sub.cmdNewPO_Click.Start
+f.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	v.Local.i.Declare
+	v.Local.iLine.Declare
+	v.Local.sVend.Declare
+	v.Local.sPart.Declare
+	v.Local.sDesc.Declare
+	v.Local.sPurU.Declare
+	v.Local.fPurC.Declare
+	v.Local.fPurQ.Declare
+	v.Local.sPrdL.Declare
+	v.Local.sMfgP.Declare
+	v.Local.sMfgN.Declare
+	v.Local.sGenL.Declare
+	v.Local.sSrch.Declare
+	v.Local.sLine.Declare
+	V.Local.sFile.Declare
+	v.Local.sDueD.Declare
+	v.Local.dDueD.Declare
+	v.Local.sPONum.Declare
+	v.Local.iPONum.Declare
+	v.Local.iCol.Declare
+	v.Local.iColCost.Declare
+	V.Local.iColVend.Declare
+	v.Local.irow.Declare
+	V.Local.iret.Declare
+	V.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.sSeq.Declare
+	v.Local.ssql.Declare
+	v.Local.sret.Declare
+	v.Local.sPrm.Declare
+	v.Local.sPOP.Declare
+	v.Local.sMsg.Declare
+	v.Local.sText.Declare
+	v.Local.sLPrt.Declare
+	v.Local.bFlag.Declare
+	v.Local.bPOEx.Declare
+	v.Local.sSplit.Declare
+	
+			
+	gui.frmDefault.gsgcOpenMatQuotes.visible(FALSE)
+	F.Intrinsic.Control.If(V.DataTable.dtPartsVendor.Exists)
+		f.Data.Datatable.Close("dtPartsVendor")
+	F.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatQuotes!dvAllSorted.Exists)
+		f.Data.DataView.Close("dtOpenMatQuotes","dvAllSorted")
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.If(v.DataView.dtOpenMatQuotes!dvAllSelected.Exists)
+		f.Data.DataView.close("dtOpenMatQuotes","dvAllSelected")
+	f.Intrinsic.Control.EndIf
+	
+	f.Data.DataView.Create("dtOpenMatQuotes","dvAllSelected",22,"SelectLine=True","PART ASC")
+	
+	'Do a check first for missing vendors or ones that already have a purchase order
+	f.Intrinsic.Control.For(v.Local.i,v.DataView.dtOpenMatQuotes!dvAllSelected.RowCount--,0,-1)
+		f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).SelectLine!Fieldval)
+			f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Vendor!FIELDVALTRIM,=,"")
+				f.Intrinsic.String.Concat("Vendor selection missing from work order: ",v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).WorkOrder!FIELDVALTRIM,v.Local.sMsg)
+				f.Data.DataView.SetValue("dtOpenMatQuotes","dvAllSelected",v.Local.i,"SelectLine",false)
+				f.Intrinsic.UI.Msgbox(v.Local.sMsg)
+			f.Intrinsic.Control.ElseIf(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).PO!FIELDVALTRIM,<>,"")
+				f.Intrinsic.String.Concat("Purchase Order already exists for work order: ",v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).WorkOrder!FIELDVALTRIM,v.Local.sMsg)
+				f.Data.DataView.SetValue("dtOpenMatQuotes","dvAllSelected",v.Local.i,"SelectLine",false)
+				f.Intrinsic.UI.Msgbox(v.Local.sMsg)
+			f.Intrinsic.Control.ElseIf(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Vendor!FIELDVALTRIM,<>,"")
+				'Double check that it is a valid vendor
+				f.Intrinsic.String.Build("SELECT * FROM V_VENDOR_MASTER WHERE VENDOR='{0}'",v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Vendor!FIELDVALTRIM,v.Local.ssql)
+				f.ODBC.Connection!CON.ExecuteAndReturn(v.Local.ssql,v.Local.sret)
+				f.Intrinsic.Control.If(v.Local.sret.Trim,=,"")
+					f.Intrinsic.String.Concat("Vendor code is invalid for work order: ",v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).WorkOrder!FIELDVALTRIM,v.Local.sMsg)
+					f.Data.DataView.SetValue("dtOpenMatQuotes","dvAllSelected",v.Local.i,"SelectLine",false)
+					f.Intrinsic.UI.Msgbox(v.Local.sMsg)
+				f.Intrinsic.Control.EndIf
+			f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Filter to seperate table
+	f.Data.DataView.ToDataTableDistinct("dtOpenMatQuotes","dvAllSelected","dtPartsVendor","SelectLine*!*Vendor")
+	f.Data.DataTable.AddColumn("dtPartsVendor","PO","String")
+	
+	'Vendor Header
+	f.Intrinsic.Control.For(v.Local.i,0,v.datatable.dtPartsVendor.RowCount--,1)
+		f.Intrinsic.Control.If(v.datatable.dtPartsVendor(v.Local.i).SelectLine!Fieldval)
+			v.Local.sVend.Set(v.datatable.dtPartsVendor(v.Local.i).Vendor!FieldvalTRIM)
+			'Get the next PO Number
+			F.ODBC.Connection!CON.executeandreturn("select F_LONG FROM OP_HEADER WHERE ID=400301 AND SEQUENCE=0000",v.Local.iPONum)
+			f.Intrinsic.Math.Add(v.Local.iPONum,1,v.Local.iPONum)
+			f.Intrinsic.String.Build("UPDATE OP_HEADER SET F_LONG={0} WHERE ID=400301 AND SEQUENCE=000",v.Local.iPONum,v.Local.ssql)
+			f.ODBC.Connection!con.execute(v.Local.ssql)
+			
+			f.Intrinsic.Control.DoUntil(v.Local.bPOEx,=,True)
+				f.Intrinsic.Math.Add(v.Local.iPONum,1,v.Local.iPONum)
+				f.Intrinsic.String.RPad(v.Local.iPONum,"0",7,v.Local.sPONum)
+				f.Intrinsic.String.Build("select * from V_PO_HEADER WHERE PURCHASE_ORDER='{0}'",v.Local.sPONum,v.Local.ssql)
+				f.ODBC.Connection!CON.executeandreturn(v.Local.ssql,v.Local.sret)
+				f.Intrinsic.Control.If(v.Local.sret.Trim,=,"")
+					v.Local.bPOEx.Set(True)
+				f.Intrinsic.Control.EndIf
+			f.Intrinsic.Control.Loop
+			
+			f.Data.DataTable.SetValue("dtPartsVendor",v.Local.i,"PO",v.Local.iPONum)
+			f.Intrinsic.Control.CallSub(getVendorSetHeader,"Vend",v.Local.sVend,"PONum",v.Local.iPONum)
+		f.Intrinsic.Control.EndIf
+		v.Local.bPOEx.Set(False)
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	'Vendor Lines
+	f.Intrinsic.Control.For(v.Local.i,0,v.DataView.dtOpenMatQuotes!dvAllSelected.RowCount--,1)
+		f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).SelectLine!Fieldval)
+			'Add one to the line and set flag for processing
+			f.Intrinsic.Math.Add(v.Local.iLine,1,v.Local.iLine)
+			v.Local.bFlag.Set(true)
+			
+			'Different vendor, reset line
+			f.Intrinsic.Control.If(v.Local.sVend.Trim,<>,v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Vendor!FIELDVALTRIM)
+				V.Local.iLine.Set(1)
+			f.Intrinsic.Control.EndIf
+			
+			'Set variables
+			v.Local.sPart.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).pART!FIELDVALTRIM)
+			v.Local.sVend.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Vendor!FIELDVALTRIM)
+			v.Local.sDesc.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).PART_DESC!FIELDVALTRIM)
+			v.Local.sPurU.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).PUR_UM!FIELDVALTRIM)
+			v.Local.fPurC.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).NewPrice!fieldval)
+			v.Local.fPurQ.Set(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).Quantity!fieldval)
+			f.Intrinsic.String.Build("SELECT PRODUCT_LINE FROM V_INVENTORY_ALL WHERE PART='{0}'",v.Local.sPart.Trim,v.Local.ssql)
+			f.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.Local.sPrdL)
+			f.Intrinsic.String.Split(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).WorkOrder!fieldvaltrim,"-",v.Local.sSplit)
+			
+			v.Local.sJob.Set(v.Local.sSplit(0))
+			v.Local.sSuf.Set(v.Local.sSplit(1))
+			v.Local.sSeq.Set(v.Local.sSplit(2))
+			V.Local.dDueD.Set(V.DataView.dtOpenMatQuotes!dvAllSelected(v.Local.i).WO_DUE_DATE!FIELDVAL)
+			v.Local.sText.Set(v.DataView.dtOpenMatQuotes!dvAllSelected(v.Local.i).TEXT!FIELDVALTRIM)
+			f.Intrinsic.String.Format(v.Local.dDueD,"MMDDYY",v.Local.sDueD)
+			
+			'GL Code
+			f.Intrinsic.String.Build("SELECT GL_ACCT FROM PL_GL_ACCOUNTS WHERE PROD_LINE='{0}' AND TYPE='2'",v.Local.sPrdL.Trim,v.Local.sSQL)
+			f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sGenL)
+			
+			'Select PO #
+			f.Intrinsic.String.Build("Vendor='{0}' AND PO<>''",v.Local.sVend,v.Local.sSrch)
+			f.Data.Datatable.Select("dtPartsVendor",v.Local.sSrch,v.Local.sret)
+			
+			'Set line & add row
+			f.Intrinsic.String.LPad(v.Local.iLine,"0",3,v.local.sLine)
+			F.Data.DataTable.AddRow("UPLPURORL","PONum",v.DataTable.dtpartsvendor(v.Local.sret).PO!fieldvaltrim,"RecType",v.Local.sLine,"WONum",v.Local.sJob,"WOSeq",v.Local.sSeq,"WOSuffix",v.Local.sSuf,"PartNum",v.Local.sPart,"MfgPartNum",v.Local.sMfgP,"MfgName",v.Local.sMfgN,"PartDesc",v.Local.sDesc,"PurchQtyOrdered",v.Local.fPurQ,"PurchCost",v.Local.fPurC,"POUM",v.Local.sPurU,"PL",v.Local.sPrdL,"GLAcct",v.Local.sGenL,"DueDate",v.Local.sDueD)
+				
+			f.Intrinsic.Control.If(v.Local.sText.Trim,<>,"")
+				f.Intrinsic.Control.CallSub(PONotes,"PO",v.DataTable.dtpartsvendor(v.Local.sret).PO!fieldvaltrim,"LINE",v.Local.sLine,"Text",v.Local.sText)
+			f.Intrinsic.Control.EndIf
+		
+		f.Intrinsic.Control.EndIf
+	f.Intrinsic.Control.Next(v.Local.i)
+	
+	
+	f.Intrinsic.Control.If(v.Local.bFlag)
+		'Upload purchase orders
+		F.Intrinsic.Control.CallSub(UPLPURORSync)
+		
+		'Open each purchase order
+		f.Intrinsic.Control.For(v.Local.i,0,v.DataTable.dtPartsVendor.RowCount--,1)
+			F.Intrinsic.Control.If(v.DataTable.dtpartsvendor(v.Local.i).SelectLine!FIELDVAL)
+				f.Data.DataTable.AddRow("175200","Mode","O","PONum",v.DataTable.dtPartsVendor(v.Local.i).PO!fieldval)
+			F.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.Next(v.Local.i)
+		f.Intrinsic.Control.CallSub(175200ASync)
+		f.Intrinsic.UI.CloseWaitDialog
+		
+		'Lock the cells
+		'Have to omit lock cells for now for the sake of speed. 11th September 2020
+		f.Intrinsic.Control.For(v.Local.i,v.DataView.dtOpenMatQuotes!dvAllSelected.RowCount--,0,-1)
+			f.Intrinsic.Control.If(v.DATAVIEW.dtOpenMatQuotes!dvAllSelected(v.Local.i).SelectLine!Fieldval)
+				f.Data.DataView.SetValue("dtOpenMatQuotes","dvAllSelected",v.Local.i,"SelectLine",False)
+			f.Intrinsic.Control.EndIf
+		f.Intrinsic.Control.Next(v.Local.i)
+	f.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.CallSub(DataLoader,"sKey","gsgcOpenMatQuotes")
+	gui.frmDefault.gsgcOpenMatQuotes.visible(true)
+	gui.frmDefault..SetFocus(1)
+	GUI.frmDefault..Enabled(True)
+f.Intrinsic.Control.Catch
+	F.Intrinsic.UI.Msgbox(V.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdNewPO_Click.End
+
+Program.Sub.PONotes.Start
+f.Intrinsic.Control.Try
+	v.Local.ssql.Declare
+	v.Local.sPO.Declare
+	v.Local.sLine.Declare
+	v.Local.sText.Declare
+	
+	v.Local.sPO.Set(v.Args.PO)
+	v.Local.sLine.Set(v.args.Line)
+	v.Local.sText.Set(v.Args.Text)
+	
+	f.Intrinsic.String.RPad(v.Local.sLine,"0",4,v.Local.sLine)
+	f.Intrinsic.String.LPad(v.Local.sPO,"0",7,v.Local.sPO)
+	f.Intrinsic.String.Build("INSERT INTO PO_LN_TEXT VALUES ('{0}','{1}','{2}')",v.local.sPO,v.local.sLine,v.Local.sText,v.Local.ssql)
+	f.ODBC.Connection!con.Execute(v.Local.ssql)
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.PONotes.End
+
+Program.Sub.getVendorSetHeader.Start
+f.Intrinsic.Control.Try
+	v.Local.ssql.Declare
+	v.Local.sret.Declare
+	v.Local.svend.Declare
+	v.Local.iPONum.Declare
+	v.Local.sVend.Set(v.Args.Vend)
+	v.Local.iPONum.Set(v.Args.PONum)
+	
+	v.Local.sVendName.Declare
+	v.Local.sVendAddr1.Declare
+	v.Local.sVendAddr2.Declare
+	v.Local.sVendAddr3.Declare
+	v.Local.sVendAddr4.Declare
+	v.Local.sVendAddr5.Declare
+	v.Local.sVendCity.Declare
+	v.Local.sVendState.Declare
+	v.Local.sVendZip.Declare
+	v.Local.sVendCountry.Declare
+	v.Local.sVendCounty.Declare
+	v.Local.sVendAttn.Declare
+	v.Local.sIntlFlag.Declare
+	v.Local.sShipVendName.Declare
+	v.Local.sShipVendAddr1.Declare
+	v.Local.sShipVendAddr2.Declare
+	v.Local.sShipVendAddr3.Declare
+	v.Local.sShipVendAddr4.Declare
+	v.Local.sShipVendAddr5.Declare
+	v.Local.sShipVendCity.Declare
+	v.Local.sShipVendState.Declare
+	v.Local.sShipVendZip.Declare
+	v.Local.sShipVendCountry.Declare
+	v.Local.sShipVendCounty.Declare 
+	v.Local.sShipVendAttn.Declare
+	v.Local.sShipIntlFlag.Declare
+	v.Local.sFOB.Declare
+	v.Local.sTrms.Declare
+	v.Local.sBuyC.Declare
+	v.Local.sEmail.Declare
+
+	f.Intrinsic.String.Build("SELECT NAME_VENDOR, ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4, ADDRESS5, CITY, STATE, CODE_ZIP, COUNTRY, COUNTY, ATTENTION, BUYER, INTL_ADRS FROM V_VENDOR_MASTER3 WHERE VENDOR='{0}'",v.Local.sVend.Trim,v.Local.sSQL)
+	f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+	f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	v.Local.sVendName.Set(v.Local.sRet(0))
+	v.Local.sVendAddr1.Set(v.Local.sRet(1))
+	v.Local.sVendAddr2.Set(v.Local.sRet(2))
+	v.Local.sVendAddr3.Set(v.Local.sRet(3))
+	v.Local.sVendAddr4.Set(v.Local.sRet(4))
+	v.Local.sVendAddr5.Set(v.Local.sRet(5))
+	v.Local.sVendCity.Set(v.Local.sRet(6))
+	v.Local.sVendState.Set(v.Local.sRet(7))
+	v.Local.sVendZip.Set(v.Local.sRet(8))
+	v.Local.sVendCountry.Set(v.Local.sRet(9))
+	v.Local.sVendCounty.Set(v.Local.sRet(10))
+	v.Local.sVendAttn.Set(v.Local.sRet(11))
+	v.Local.sBuyC.Set(v.Local.sRet(12))
+	v.Local.sIntlFlag.Set(v.Local.sRet(13))
+	
+	f.ODBC.Connection!con.ExecuteAndReturn("SELECT NAME_VENDOR, ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4, ADDRESS5, CITY, STATE, CODE_ZIP, COUNTRY, COUNTY, ATTENTION, INTL_ADRS FROM V_VENDOR_MASTER3 WHERE RESV='1'",v.Local.sRet)
+	f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	v.Local.sShipVendName.Set(v.Local.sRet(0))
+	v.Local.sShipVendAddr1.Set(v.Local.sRet(1))
+	v.Local.sShipVendAddr2.Set(v.Local.sRet(2))
+	v.Local.sShipVendAddr3.Set(v.Local.sRet(3))
+	v.Local.sShipVendAddr4.Set(v.Local.sRet(4))
+	v.Local.sShipVendAddr5.Set(v.Local.sRet(5))
+	v.Local.sShipVendCity.Set(v.Local.sRet(6))
+	v.Local.sShipVendState.Set(v.Local.sRet(7))
+	v.Local.sShipVendZip.Set(v.Local.sRet(8))
+	v.Local.sShipVendCountry.Set(v.Local.sRet(9))
+	v.Local.sShipVendCounty.Set(v.Local.sRet(10))
+	v.Local.sShipVendAttn.Set(v.Local.sRet(11))
+	v.Local.sShipIntlFlag.Set(v.Local.sRet(12))
+	
+	f.Intrinsic.String.Build("SELECT payment_terms, code_fob FROM V_VENDOR_PAY_TO WHERE VENDOR='{0}'",v.Local.sVend.Trim,v.Local.sSQL)
+	f.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSQL,v.Local.sRet)
+	f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	v.Local.sTrms.Set(v.Local.sRet(0))
+	v.Local.sFOB.Set(v.Local.sRet(1))
+	
+	F.Intrinsic.String.Build("SELECT EMAIL FROM V_VENDOR_ADDL WHERE VENDOR='{0}'",v.Local.svend.Trim,v.Local.ssql)
+	f.ODBC.Connection!con.ExecuteAndReturn(v.Local.ssql,v.Local.sEmail)
+	
+	f.Intrinsic.String.Build("select TERMS_MESSAGE from V_AP_TERMS WHERE TERMS_CODE='{0}'",V.Local.sTrms,V.Local.sSQL)
+	F.ODBC.Connection!CON.ExecuteAndReturn(v.Local.sSql,v.Local.sTrms)
+	
+
+	F.Data.DataTable.AddRow("UPLPURORA","PONum",v.Local.iPONum,"OrderTaxCode","T","VendNum",v.Local.sVend,"Terms",v.Local.sTrms,"BuyerCode",v.LOCAL.sBuyC,"FOBInfo",v.Local.sFOB)
+	f.Data.DataTable.AddRow("UPLPURORBC","PONum",v.Local.iPONum,"RecType","B","VendName",v.Local.sVendName,"VendAddr1",v.Local.sVendAddr1,"VendAddr2",v.Local.sVendAddr2,"VendAddr3",v.Local.sVendAddr3,"VendAddr4",v.Local.sVendAddr4,"VendAddr5",v.Local.sVendAddr5,"VendCity",v.Local.sVendCity,"VendState",v.Local.sVendState,"VendZip",v.Local.sVendZip,"VendCountry",v.Local.sVendCountry,"VendAttn",v.Local.sVendAttn,"IntlFlag",v.Local.sIntlFlag,"ContactEmail",v.Local.sEmail)
+	F.Data.DataTable.AddRow("UPLPURORBC","PONum",v.Local.iPONum,"RecType","C","VendName",v.Local.sShipVendName,"VendAddr1",v.Local.sShipVendAddr1,"VendAddr2",v.Local.sShipVendAddr2,"VendAddr3",v.Local.sShipVendAddr3,"VendAddr4",v.Local.sShipVendAddr4,"VendAddr5",v.Local.sShipVendAddr5,"VendCity",v.Local.sShipVendCity,"VendState",v.Local.sShipVendState,"VendZip",v.Local.sShipVendZip,"VendCountry",v.Local.sShipVendCountry,"VendAttn",v.Local.sShipVendAttn,"IntlFlag",v.Local.sShipIntlFlag,"ContactEmail",v.Local.sEmail)
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.ODBC.Connection!con.Close
+	f.Intrinsic.Control.End
+f.Intrinsic.Control.EndTry
+
+Program.Sub.getVendorSetHeader.End
+
+Program.Sub.GsGC_CellValueChanged_Universal.Start
+f.Intrinsic.Control.Try
+	v.Local.ssql.Declare
+	v.Local.sret.Declare
+	v.Local.sPart.Declare
+	v.Local.sFGPart.Declare
+	v.Local.sJob.Declare
+	v.Local.sSuf.Declare
+	v.Local.sSeq.Declare
+	v.Local.sWO.Declare
+	v.Local.sSplit.Declare
+	V.Local.fRunQty.Declare
+	v.Local.fCalcQty.Declare
+	V.Local.fDiff.Declare
+	v.Local.fCurPrice.Declare
+	v.Local.fNewPrice.Declare
+	v.Local.fTemp1.Declare
+	
+	v.Local.sQteSeq.Declare
+	v.Local.fQty.Declare
+	v.Local.sRFQLine.Declare
+	v.Local.sRFQ.Declare
+	v.Local.sDateFormat.Declare
+	V.Local.sCol.Declare
+	V.Local.sColW.Declare
+'	
+	F.Intrinsic.Control.SelectCase(V.Args.ControlName)
+		F.Intrinsic.Control.Case("GSGCOPENMATREQ")
+			gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","Part",v.Args.RowIndex,v.Local.sPart)
+			gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","Job",v.Args.RowIndex,v.Local.sJob)
+			gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","Suffix",v.Args.RowIndex,v.Local.sSuf)
+			gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","Seq",v.Args.RowIndex,v.Local.sSeq)
+			gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","RUN_QTY",v.Args.RowIndex,v.Local.fRunQty)
+			f.Intrinsic.String.Build("SELECT PART FROM V_JOB_HEADER WHERE JOB='{0}' AND SUFFIX='{1}'",v.Local.sJob,v.Local.sSuf,v.Local.ssql)
+			f.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.Local.sFGPart)
+			
+		F.Intrinsic.Control.Case("GSGCOPENMATQUOTES")
+			f.Data.DataTable.SetValue("dtOpenMatQuotes",v.Args.RowIndex,"SelectLine",True)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","Part",v.Args.RowIndex,v.Local.sPart)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","WorkOrder",v.Args.RowIndex,v.Local.sWO)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","seq",v.Args.RowIndex,v.Local.sQteSeq)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","Quantity",v.Args.RowIndex,v.Local.fQty)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","rfq_line",v.Args.RowIndex,v.Local.sRFQLine)
+			gui.frmDefault.GSGCOPENMATQUOTES.GetCellValueByColumnName("gvOpenMatQuotes","RFQ_NUMBER",v.Args.RowIndex,v.Local.sRFQ)
+			f.Intrinsic.String.Split(v.Local.sWO,"-",v.Local.sWO)
+			v.Local.sJob.Set(v.Local.sWO(0))
+			v.Local.sSuf.Set(v.Local.sWO(1))
+			v.Local.sSeq.Set(v.Local.sWO(2))
+			f.Intrinsic.String.Build("SELECT PART FROM V_JOB_HEADER WHERE JOB='{0}' AND SUFFIX='{1}'",v.Local.sJob,v.Local.sSuf,v.Local.ssql)
+			f.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.Local.sFGPart)
+			
+	F.Intrinsic.Control.EndSelect
+	
+	F.Intrinsic.Control.SelectCase(V.Args.ControlName)
+		F.Intrinsic.Control.Case("GSGCOPENMATQUOTES")
+			F.Intrinsic.Control.SelectCase(V.Args.Column)
+					
+				F.Intrinsic.Control.Case("NewPrice")
+					f.Intrinsic.String.Build("UPDATE ROUTER_LINE SET RATE='{0}' WHERE PART_WC_OUTSIDE='{1}' AND ROUTER='{2}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					
+					f.Intrinsic.String.Build("UPDATE VEND_QTE_LINES SET UNIT_PRICE='{0}' WHERE PART='{1}' AND SEQ='{2}' AND QUANTITY='{3}' AND RFQ_LINE='{4}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sQteSeq,v.Local.fQty,v.Local.sRFQLine,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					
+					'updatehere
+					f.Intrinsic.String.Build("UPDATE INVENTORY_MSTR SET AMT_ALT_COST='{0}' WHERE PART='{1}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					v.Local.fNewPrice.Set(v.Args.value)
+					v.Local.fCurPrice.Set(v.DataTable.dtOpenMatQuotes(v.Args.RowIndex).CurPrice!fieldval)
+					
+					'Insert into History
+					f.Intrinsic.String.Format(v.Ambient.Now,"YYYY-MM-DD HH:NN:SS",v.Local.sDateFormat)
+					f.Intrinsic.String.Build("INSERT INTO GAB_6476_PRICE_HIST (RFQ_NUMBER, RFQ_LINE, PRICE, USER_CHANGE, DATE_CHANGE) VALUES ('{0}','{1}',{2},'{3}','{4}')",V.Local.sRFQ,V.Local.sRFQLine,v.Local.fNewPrice,v.Caller.User,v.Local.sDateFormat,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					
+					'Do Calculation of difference
+					f.Intrinsic.Math.Sub(v.Local.fNewPrice,v.Local.fCurPrice,v.Local.fTemp1)
+					f.Intrinsic.Control.If(v.Local.fTemp1,<>,0)
+					f.Intrinsic.Control.AndIf(v.Local.fCurPrice,<>,0)
+						f.Intrinsic.Math.Div(v.Local.fTemp1,v.Local.fCurPrice,v.Local.fDiff)
+						f.Intrinsic.Math.Mult(v.Local.fDiff,100,v.Local.fDiff)
+						f.Intrinsic.Math.Round(v.Local.fDiff,2,v.Local.fDiff)
+					f.Intrinsic.Control.Else
+						v.Local.fDiff.Set(0)
+					f.Intrinsic.Control.EndIf
+					f.Data.DataTable.SetValue("dtOpenMatQuotes",v.Args.RowIndex,"Diff",v.Local.fDiff)
+			
+			f.Intrinsic.Control.EndSelect
+			
+		F.Intrinsic.Control.Case("GSGCOPENMATREQ")
+			F.Intrinsic.Control.SelectCase(V.Args.Column)
+				F.Intrinsic.Control.Case("Description")
+					'Update Inventory Description
+					f.Intrinsic.String.Build("UPDATE INVENTORY_MSTR SET DESCRIPTION='{0}' WHERE PART='{1}'",v.args.Value.PSQLFriendly,v.Local.sPart.trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Update Router Description
+					'f.Intrinsic.String.Build("UPDATE ROUTER_LINE SET DESC_RT_LINE='{0}' WHERE PART_WC_OUTSIDE='{1}' AND LINE_ROUTER='{2}' AND ROUTER='{3}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sSeq,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.Intrinsic.String.Build("UPDATE ROUTER_LINE SET DESC_RT_LINE='{0}' WHERE PART_WC_OUTSIDE='{1}' AND ROUTER='{2}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Update Job Operation Description
+					f.Intrinsic.String.Build("UPDATE JOB_OPERATIONS SET DESCRIPTION='{0}' WHERE PART='{1}' AND JOB='{2}' AND SUFFIX='{3}' AND SEQ='{4}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sJob,v.Local.sSuf,v.Local.sSeq,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Set row to be true
+					f.Data.DataTable.SetValue("dtOpenMatReq",v.Args.rowindex,"SelectLine",true)
+					
+				F.Intrinsic.Control.Case("TEXT")
+					F.Intrinsic.Control.If(V.Args.Value.PSQLFriendly,<>,"")
+						'Update Router Description
+						f.Intrinsic.String.Build("SELECT * FROM RTR_SEQ_COMMENTS WHERE RTR_NUMBER='{0}' AND RTR_SEQ='{1}'",V.Local.sFGPart,V.Local.sSeq,V.Local.ssql)
+						F.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.local.sret)
+						f.Intrinsic.Control.If(v.Local.sret.Trim,<>,"")
+							f.Intrinsic.String.Build("UPDATE RTR_SEQ_COMMENTS SET TEXT='{0}' WHERE RTR_NUMBER='{1}' AND RTR_SEQ='{2}'",v.args.Value.PSQLFriendly,v.Local.sFGPart.Trim,v.Local.sSeq,v.Local.ssql)
+							f.ODBC.Connection!con.execute(v.Local.ssql)
+						f.Intrinsic.Control.Else
+							f.Intrinsic.String.Build("INSERT INTO RTR_SEQ_COMMENTS VALUES ('{0}','{1}','{2}')",V.Local.sFGPart,V.Local.sSeq,V.Args.Value.PSQLFriendly,v.Local.ssql)
+							f.ODBC.Connection!con.execute(v.Local.ssql)
+						f.Intrinsic.Control.EndIf
+						'Update Work Order
+						f.Intrinsic.String.Build("SELECT * FROM WO_SEQ_COMMENTS WHERE WO='{0}' AND WO_SUFFIX='{1}' AND WO_SEQ='{2}'",v.Local.sJob,v.Local.sSuf,v.Local.sseq,V.Local.ssql)
+						F.ODBC.Connection!con.executeandreturn(v.Local.ssql,v.local.sret)
+						f.Intrinsic.Control.If(v.Local.sret.Trim,<>,"")
+							f.Intrinsic.String.build("UPDATE WO_SEQ_COMMENTS SET TEXT='{0}' WHERE WO='{1}' AND WO_SUFFIX='{2}' AND WO_SEQ='{3}'",v.Args.Value.PSQLFriendly,v.Local.sJob,v.Local.sSuf,v.Local.sseq,v.Local.ssql)
+							f.ODBC.Connection!con.execute(v.Local.ssql)
+						F.Intrinsic.Control.Else
+							f.Intrinsic.String.Build("INSERT INTO WO_SEQ_COMMENTS VALUES ('{0}','{1}','{2}','{3}')",V.Local.sJob,V.Local.sSuf,V.Local.sSeq,V.Args.Value.PSQLFriendly,v.Local.ssql)
+							f.ODBC.Connection!con.execute(v.Local.ssql)
+						f.Intrinsic.Control.EndIf
+						'Set row to be true
+						f.Data.DataTable.SetValue("dtOpenMatReq",v.Args.rowindex,"SelectLine",true)
+					F.Intrinsic.Control.EndIf
+					
+					
+				F.Intrinsic.Control.Case("UM")
+					'Update Work Order
+					f.Intrinsic.String.build("UPDATE JOB_OPERATIONS SET UM='{0}' WHERE JOB='{1}' AND SUFFIX='{2}' AND SEQ='{3}'",v.Args.Value.PSQLFriendly,v.Local.sJob,v.Local.sSuf,v.Local.sSeq,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Update Router 
+					'f.Intrinsic.String.build("UPDATE ROUTER_LINE SET UM_INVENTORY='{0}' WHERE PART_WC_OUTSIDE='{1}' AND LINE_ROUTER='{2}' AND ROUTER='{3}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sSeq,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.Intrinsic.String.build("UPDATE ROUTER_LINE SET UM_INVENTORY='{0}' WHERE PART_WC_OUTSIDE='{1}'  AND ROUTER='{2}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Set row to be true
+					f.Data.DataTable.SetValue("dtOpenMatReq",v.Args.rowindex,"SelectLine",true)
+					V.Global.bResched.Set(true)
+					
+				F.Intrinsic.Control.Case("UNIT_QUANTITY")
+					f.Intrinsic.Math.Mult(v.Args.value,v.Local.fRunQty,v.Local.fCalcQty)
+					F.Data.DataTable.SetValue("dtOpenMatReq",v.Args.rowindex,"RFQ_QUANTITY",v.Local.fCalcQty)
+					'Update Work Order
+					f.Intrinsic.String.build("UPDATE JOB_OPERATIONS SET HOURS_ESTIMATED={0}, UNITS={1} WHERE JOB='{2}' AND SUFFIX='{3}' AND SEQ='{4}'",v.Local.fCalcQty,v.Args.Value.PSQLFriendly,v.Local.sJob,v.Local.sSuf,v.Local.sSeq,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Update Router 
+					'f.Intrinsic.String.build("UPDATE ROUTER_LINE SET RUN_TIME='{0}' WHERE PART_WC_OUTSIDE='{1}' AND LINE_ROUTER='{2}' AND ROUTER='{3}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sSeq,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.Intrinsic.String.build("UPDATE ROUTER_LINE SET RUN_TIME='{0}' WHERE PART_WC_OUTSIDE='{1}' AND ROUTER='{2}'",v.args.Value.PSQLFriendly,v.Local.sPart.Trim,v.Local.sFGPart.Trim,v.Local.ssql)
+					f.ODBC.Connection!con.execute(v.Local.ssql)
+					'Set row to be true
+					f.Data.DataTable.SetValue("dtOpenMatReq",v.Args.rowindex,"SelectLine",true)
+					V.Global.bResched.Set(true)
+					
+			f.Intrinsic.Control.EndSelect
+	f.Intrinsic.Control.EndSelect
+f.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(Catching,"Sub",V.Ambient.CurrentSubroutine,"ErrorNo",V.Ambient.ErrorNumber,"ErrorDesc",V.Ambient.ErrorDescription) 
+f.Intrinsic.Control.EndTry
+Program.Sub.GsGC_CellValueChanged_Universal.End
+
+Program.Sub.GsGC_RowCellClick_Universal.Start
+	'V.Args.Screen: FRMMAIN
+	'V.Args.ControlName:GSGCDATA0
+	'V.Args.EventType: ROWCELLCLICK
+	'V.Args.Column: @Part
+	'V.Args.RowIndex: 0
+	V.Local.iBID.Declare
+	V.Local.sBIReport.Declare
+	v.Local.sParam.Declare
+	v.Local.sValue.Declare
+	v.Local.sRFQ.Declare
+	v.Local.sRFQLine.Declare
+	v.Local.sSql.Declare
+	v.Local.sRet.Declare
+	v.Local.sCol.Declare
+	v.Local.sColW.Declare
+	
+	'This sub call will handle all of the basic built in core data entity stuff...
+	'linking to S&D, PO View, SO View, WO View, and DCS Linking
+	'@Part, @SO, @PO, @WO, PART, SO, PO, WO columns all handled in the basic sense.
+	F.Intrinsic.Control.CallSub(GetActiveGridView,"ControlName",V.Args.ControlName)
+	F.Intrinsic.Control.CallSub(RowCellClick_HandleCoreEntity, "Screen", V.Args.Screen, "ControlName", V.Args.ControlName, "EventType", V.Args.EventType, "Column", V.Args.Column, "RowIndex", V.Args.RowIndex, "GridView", V.Args.GridView)
+	
+	'Handle anything not handled...
+	F.Intrinsic.Control.SelectCase(V.Args.ControlName)
+		F.Intrinsic.Control.Case("GSGCOPENMATREQ")
+			F.Intrinsic.Control.SelectCase(V.Args.Column)
+				F.Intrinsic.Control.Case("Browse")
+					v.Global.iVendRow.Set(v.Args.RowIndex)
+					gui.frmDefault.lookupVendor.Show
+					
+				F.Intrinsic.Control.Case("RFQ")
+					v.Global.iVendRow.Set(v.Args.RowIndex)
+					v.Local.sParam.Set("RFQNum")
+					v.Local.sBIReport.Set("GAB_6476_RFQ_REPORT.rpt")
+					f.Global.BI.GetIDFromName(v.Local.sBIReport,v.Local.iBID)
+					GUI.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","RFQ",v.Args.RowIndex,v.Local.sValue)
+					f.Global.BI.PrintReport(v.Local.iBID,0,v.Local.sParam,v.Local.sValue,"",false)
+					
+				F.Intrinsic.Control.Case("BrowsePart")
+					v.Global.iVendRow.Set(v.Args.RowIndex)
+					gui.frmDefault.lookupPart.Show
+			
+				F.Intrinsic.Control.Case("WO")
+					'Do Work-Ordery Things...
+					
+				F.Intrinsic.Control.Case("^EDIT")
+					'DO EDITS!
+					
+			F.Intrinsic.Control.EndSelect
+		
+		F.Intrinsic.Control.Case("GSGCOPENMATQUOTES")
+			F.Intrinsic.Control.SelectCase(V.Args.Column)
+				F.Intrinsic.Control.Case("PriceHist")
+					GUI.frmDefault.gsgcOpenMatQuotes.GetCellValueByColumnName("gvOpenMatQuotes","RFQ_NUMBER",v.Args.RowIndex,v.Local.sRFQ)
+					GUI.frmDefault.gsgcOpenMatQuotes.GetCellValueByColumnName("gvOpenMatQuotes","RFQ_LINE",v.Args.RowIndex,v.Local.sRFQLine)
+					f.Intrinsic.String.Build("SELECT PRICE, USER_CHANGE, CONVERT(DATE_CHANGE,SQL_CHAR) AS 'DateChange' FROM GAB_6476_PRICE_HIST WHERE RFQ_NUMBER='{0}' AND RFQ_LINE='{1}' order by date_change desc",V.Local.sRFQ,V.Local.sRFQLine,V.Local.ssql)
+					'Split Column Names into an array (*!* delimited string)
+					F.Intrinsic.String.Split("Price*!*User Changed*!*Date Changed","*!*",V.Local.sCol)
+					'Split Column widths into an array (*!* delimited string)
+					F.Intrinsic.String.Split("800*!*1000*!*2000","*!*",V.Local.sColW)
+					F.Intrinsic.UI.Browser("Price History","con",V.Local.sSQL,V.Local.sCol,V.Local.sColW,V.Local.sRet)
+					F.Intrinsic.Control.If(V.Local.sRet,<>,"***CANCEL***")
+						f.Intrinsic.UI.SleepMs(1)
+					F.Intrinsic.Control.EndIf
+					
+				F.Intrinsic.Control.Case("RFQ_NUMBER")
+					v.Global.iVendRow.Set(v.Args.RowIndex)
+					v.Local.sParam.Set("RFQNum")
+					v.Local.sBIReport.Set("GAB_6476_RFQ_REPORT.rpt")
+					f.Global.BI.GetIDFromName(v.Local.sBIReport,v.Local.iBID)
+					GUI.frmDefault.gsgcOpenMatQuotes.GetCellValueByColumnName("gvOpenMatQuotes","RFQ_NUMBER",v.Args.RowIndex,v.Local.sValue)
+					f.Global.BI.PrintReport(v.Local.iBID,0,v.Local.sParam,v.Local.sValue,"",false)
+			f.Intrinsic.Control.EndSelect
+	F.Intrinsic.Control.EndSelect
+Program.Sub.GsGC_RowCellClick_Universal.End
+
+Program.Sub.lookupVendor_SelectionMade.Start
+v.Local.spart.Declare
+v.Local.ssql.Declare
+F.Intrinsic.UI.Sleep(1)
+f.Data.DataTable.SetValue("dtOpenMatReq",v.Global.iVendRow,"VENDORNUM",v.DataTable.lookupVendor_Result(0).VENDOR!FIELDVALTRIM,"VENDORNAME",v.DataTable.lookupVendor_Result(0).NAME_VENDOR!FIELDVALTRIM,"SelectLine",true)
+gui.frmDefault.gsgcOpenMatReq.GetCellValueByColumnName("gvOpenMatReq","Part",V.Global.iVendRow,v.Local.sPart)
+f.Intrinsic.String.build("UPDATE INVENTORY_MST2 SET NAME_VENDOR='{0}' WHERE PART='{1}'",v.DataTable.lookupVendor_Result(0).VENDOR!FIELDVALTRIM,v.Local.spart,v.Local.ssql)
+f.ODBC.Connection!con.execute(v.Local.ssql)
+V.Global.bResched.Set(True)
+V.Global.iVendRow.Set(0)
+Program.Sub.lookupVendor_SelectionMade.End
+
+Program.Sub.lookupPart_SelectionMade.Start
+F.Intrinsic.UI.Sleep(1)
+v.Local.ssql.Declare
+v.Local.sOldPart.Declare
+v.Local.sOldPart.Set(v.DataTable.dtOpenMatReq(v.Global.iVendRow).PART!FIELDVALTRIM)
+f.Data.DataTable.SetValue("dtOpenMatReq",v.Global.iVendRow,"PART",v.DataTable.lookupPart_Result(0).PART!FIELDVALTRIM,"DESCRIPTION",v.DataTable.lookupPart_Result(0).DESCRIPTION!FIELDVALTRIM,"UM",v.DataTable.lookupPart_Result(0).UM_INVENTORY!FIELDVALTRIM,"VendorNum",v.DataTable.lookupPart_Result(0).VendorNumber!FIELDVALTRIM,"VendorName",v.DataTable.lookupPart_Result(0).VendorName!FIELDVALTRIM,"SelectLine",true)
+'Update Work Order
+f.Intrinsic.String.build("UPDATE JOB_OPERATIONS SET PART='{0}', DESCRIPTION='{1}', UM='{2}' WHERE JOB='{3}' AND SUFFIX='{4}' AND SEQ='{5}'",v.DataTable.lookupPart_Result(0).PART!FIELDVALTRIM,v.DataTable.lookupPart_Result(0).DESCRIPTION!FIELDVALTRIM,v.DataTable.lookupPart_Result(0).UM_INVENTORY!FIELDVALTRIM,V.DataTable.dtOpenMatReq(v.global.iVendRow).JOB!FIELDVAL,V.DataTable.dtOpenMatReq(v.global.iVendRow).SUFFIX!FIELDVAL,V.DataTable.dtOpenMatReq(v.global.iVendRow).SEQ!FIELDVAL,v.Local.ssql)
+f.ODBC.Connection!con.execute(v.Local.ssql)
+'Update Router 
+f.Intrinsic.String.Build("UPDATE ROUTER_LINE SET PART_WC_OUTSIDE='{0}', DESC_RT_LINE='{1}',  UM_INVENTORY='{2}' WHERE PART_WC_OUTSIDE='{3}'AND LINE_ROUTER='{4}' AND ROUTER='{5}'",v.DataTable.lookupPart_Result(0).PART!FIELDVALTRIM,v.DataTable.lookupPart_Result(0).DESCRIPTION!FIELDVALTRIM,v.DataTable.lookupPart_Result(0).UM_INVENTORY!FIELDVALTRIM,v.Local.sOldPart.Trim,V.DataTable.dtOpenMatReq(v.global.iVendRow).SEQ!FIELDVAL,V.DataTable.dtOpenMatReq(v.global.iVendRow).ROUTER!FIELDVAL,v.Local.ssql)
+f.ODBC.Connection!con.execute(v.Local.ssql)
+V.Global.bResched.Set(True)
+V.Global.iVendRow.Set(0)
+Program.Sub.lookupPart_SelectionMade.End
+
+Program.Sub.uploadVendorQuote.Start
+f.Intrinsic.Control.Try
+	V.Local.sFiles.Declare
+	V.Local.sret.Declare
+	v.Local.srows.Declare
+	v.Local.i.Declare
+	v.Local.svals.Declare
+	v.Local.shold.Declare
+	V.Local.ssql.Declare
+	v.Local.smfgpart.Declare
+	v.Local.smfgname.Declare
+	v.Local.spart.Declare
+	v.Local.sUMInv.Declare
+	v.Local.dquote.Declare
+	v.Local.squotedate.Declare
+	v.Local.sQuoteexpiration.Declare
+	v.Local.dQuoteExpiration.Declare
+	v.Local.sVendorName.Declare
+	V.Local.Lobob.Declare
+	v.Local.sblank.Declare(string,"")
+	v.Local.sdescription.Declare
+	v.Local.sum.Declare
+	v.Local.svendor.Declare
+	v.Local.sdisplay.Declare
+	v.Local.sMaxNum.Declare
+	v.Local.sRFQNum.Declare
+	v.Local.fQuantity.Declare
+	v.Local.fPrice.Declare
+	v.Local.iFill.Declare(long,0)
+	v.Local.lRet.Declare
+	v.Local.iMaxNum.Declare
+	v.Local.sNewMaxNum.Declare
+	v.Local.sNewRFQLine.Declare
+	v.Local.sJobSuffSeq.Declare
+	v.Local.dReqByDate.Declare
+	v.Local.dReqByDate.Set(v.Ambient.Date)
+	v.Local.sReqByDate.Declare
+	f.Intrinsic.Date.DateAdd("d",1,v.Local.dReqByDate,v.Local.dReqByDate)
+	f.Intrinsic.String.Format(v.Local.dReqByDate,"YYYYMMDD",v.Local.sReqByDate)
+	
+	
+	v.Local.spart.Set(v.Args.Part)
+	v.Local.svendor.Set(v.Args.Vendor)
+	v.Local.fQuantity.Set(v.Args.Quantity)
+	v.Local.sNewMaxNum.Set(v.Args.RFQ)
+	v.Local.sNewRFQLine.Set(v.Args.RFQLine)
+	v.local.sJobSuffSeq.Set(v.Args.JobSuffixSeq)
+	v.Local.squotedate.Set("")
+	v.Local.smfgpart.Set("")
+	v.Local.smfgname.Set("")
+	v.Local.sUMInv.Set("")
+	v.Local.sum.Set("")
+
+	'Part
+	f.Intrinsic.String.RPad(v.Local.spart," ",20,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Vendor No
+	f.Intrinsic.String.RPad(v.Local.svendor," ",6,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'QuoteDate
+	f.Intrinsic.String.RPad(v.Local.squotedate," ",6,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'MFG Part No.
+	f.Intrinsic.String.RPad(v.Local.smfgpart," ",23,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'MFG Name
+	f.Intrinsic.String.RPad(v.Local.smfgname," ",23,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'um inv
+	f.Intrinsic.String.RPad(v.Local.sUMInv," ",2,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'UM Purch
+	f.Intrinsic.String.RPad(v.Local.sum," ",2,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Conversion FActor
+	f.Intrinsic.String.RPad(v.Local.sblank," ",16,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'RFQ Number
+	f.Intrinsic.String.RPad(v.Local.sNewMaxNum," ",6,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Required By
+	f.Intrinsic.String.RPad(v.Local.sReqByDate," ",8,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'filler 1
+	f.Intrinsic.String.RPad(v.Local.sblank," ",122,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'quantity 1
+	f.Intrinsic.String.RPad(v.Local.fQuantity," ",16,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'price 1
+	f.Intrinsic.String.RPad(v.Local.fPrice," ",16,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Pad until sort code
+	f.Intrinsic.String.RPad(v.Local.sblank," ",288,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Job Suffix Seq
+	f.Intrinsic.String.RPad(v.Local.sJobSuffSeq," ",20,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'Pad until RFQ Line
+	f.Intrinsic.String.RPad(v.Local.sblank," ",288,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'RFQ Line
+	f.Intrinsic.String.RPad(v.Local.sNewRFQLine," ",3,v.Local.shold)
+	f.Intrinsic.String.Concat(v.global.sBuildData,v.Local.shold,v.global.sBuildData)
+	'New Line
+	f.Intrinsic.String.Concat(v.Global.sBuildData,v.Ambient.NewLine,v.Global.sBuildData)
+	
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+
+Program.Sub.uploadVendorQuote.End
+
+Program.Sub.Comments.Start
+${$5$}$2.0.0.0$}$2
+${$6$}$Ryan$}$20210906084855282$}$zT7b+sV1eISPUtInNavz/nuzcK/R1TVIZN+0oldZ2alykva/3fUA0VYIEBOadCOa0K57kEvwvfI=
+Program.Sub.Comments.End
